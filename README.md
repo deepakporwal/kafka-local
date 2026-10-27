@@ -84,6 +84,50 @@ Hello from my local Kafka cluster!
 The message appears in the consumer terminal. Stop either interactive command
 with `Ctrl+C`.
 
+### Produce and consume a keyed JSON message
+
+Create a separate topic for the order example:
+
+```shell
+docker exec -it kafka1 kafka-topics --bootstrap-server localhost:29092 --create --topic tours-inquiry --partitions 3 --replication-factor 3
+```
+
+In one terminal, start a consumer that prints each message key before its
+value:
+
+```powershell
+docker exec -it kafka1 kafka-console-consumer `
+  --bootstrap-server localhost:29092 `
+  --topic tours-inquiry `
+  --group tours-inquiry-consumer `
+  --from-beginning `
+  --property print.key=true `
+  --property key.separator=" : "
+```
+
+In another terminal, start a producer configured to parse the key from each
+line:
+
+```powershell
+docker exec -it kafka1 kafka-console-producer `
+  --bootstrap-server localhost:29092 `
+  --topic tours-inquiry `
+  --property parse.key=true `
+  --property key.separator=" : "
+```
+
+Enter this line in the producer and press Enter:
+
+```text
+order-101 : {"orderId":101,"customer":"Amit","amount":1500}
+```
+
+The consumer displays the key and JSON value:
+
+```text
+order-101 : {"orderId":101,"customer":"Amit","amount":1500}
+```
+
 ## Stop the cluster
 
 Stop and remove the containers while keeping Kafka and ZooKeeper data in their
